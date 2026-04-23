@@ -4,7 +4,7 @@ To start the project, you need to register the database data (POSTGRES_USER and 
 Then run the project using the command
 
 ```bash
-docker compose -f docker-compose.dev.yml up --build
+docker compose up -d --build
 ```
 
 Then run the migrations
