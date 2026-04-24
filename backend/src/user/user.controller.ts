@@ -23,7 +23,7 @@ export class UserController {
 
   @Get('me')
   getProfile(@Request() req) {
-    return this.userService.findByEmail(req.user.email as string);
+    return this.userService.findProfileById(Number(req.user.sub));
   }
 
   @Patch('me')

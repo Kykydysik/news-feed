@@ -5,6 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UploadService } from '../upload/upload.service';
+import { hashPassword, looksLikePasswordHash } from '../auth/password.util';
 
 @Injectable()
 export class UserService {
@@ -29,9 +30,22 @@ export class UserService {
   }
 
   findByEmail(email: string) {
-    // убрать поля типа password
     return this.usersRepository.findOne({
       where: { email },
+    });
+  }
+
+  findAuthByEmail(email: string) {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .getOne();
+  }
+
+  findProfileById(id: number) {
+    return this.usersRepository.findOne({
+      where: { id },
     });
   }
 
@@ -40,25 +54,29 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     file?: Express.Multer.File,
   ) {
+    const normalizedUpdateUserDto = { ...updateUserDto };
     let avatar: string | undefined = undefined;
     const currentUser = await this.usersRepository.findOne({
       where: { id },
-    });
-
-    console.log({
-      ...currentUser,
-      ...updateUserDto,
-      avatar,
     });
 
     if (file) {
       avatar = await this.uploadService.saveFile(file, 'news');
     }
 
+    if (
+      normalizedUpdateUserDto.password &&
+      !looksLikePasswordHash(normalizedUpdateUserDto.password)
+    ) {
+      normalizedUpdateUserDto.password = await hashPassword(
+        normalizedUpdateUserDto.password,
+      );
+    }
+
     return this.usersRepository.update(id, {
       ...currentUser,
-      ...updateUserDto,
-      avatar,
+      ...normalizedUpdateUserDto,
+      avatar: avatar ?? currentUser?.avatar,
     });
   }
 

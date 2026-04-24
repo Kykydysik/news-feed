@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -7,7 +8,7 @@ import { getDatabaseConfig } from './database/database.config';
 import { NewsModule } from './news/news.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { UploadService } from './upload/upload.service';
+import { UploadModule } from './upload/upload.module';
 
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -20,6 +21,10 @@ MulterModule.register({
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['../.env', '.env'],
+    }),
     TypeOrmModule.forRoot(getDatabaseConfig()),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
@@ -28,7 +33,7 @@ MulterModule.register({
     }),
     NewsModule,
     UserModule,
-    UploadService,
+    UploadModule,
     AuthModule,
   ],
   controllers: [AppController],

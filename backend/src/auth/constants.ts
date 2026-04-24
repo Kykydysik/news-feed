@@ -1,3 +1,1 @@
-export const jwtConstants = {
-  secret: 'Вынести это в докер',
-};
+export const jwtConstants = {};
