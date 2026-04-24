@@ -11,9 +11,6 @@ import { FileUpload } from 'primereact/fileupload'
 import { useState } from "react";
 
 export default function NewsDialog({ news, handleCloseDialog, isOpen }: { news: NewsItem | null; handleCloseDialog: () => void; isOpen: boolean }) {
-
-  if (!isOpen) return null
-
   const { mutateAsync } = useRemoveNews()
   const { mutateAsync: updateNews } = useUpdateNews()
   const { mutateAsync: createNews } = useCreateNews()
@@ -39,6 +36,8 @@ export default function NewsDialog({ news, handleCloseDialog, isOpen }: { news: 
       news_text: news?.news_text || '',
     },
   });
+
+  if (!isOpen) return null
 
   const onSubmit: SubmitHandler<CreateNewsItemParams> = async (data) => {
     const formData = new FormData();
