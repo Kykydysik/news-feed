@@ -1,4 +1,4 @@
-import { IsString, IsUrl, Min, IsInt } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateNewsDto {
   @IsString()
@@ -6,12 +6,4 @@ export class CreateNewsDto {
 
   @IsString()
   news_text: string;
-
-  @IsString()
-  @IsUrl()
-  image: string;
-
-  @IsInt()
-  @Min(1)
-  author_id: number;
 }
