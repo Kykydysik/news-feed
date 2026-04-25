@@ -83,7 +83,6 @@ export default function EditProfile() {
             <FileUpload
                 name="image"
                 accept="image/*"
-                maxFileSize={1000000}
                 customUpload
                 onSelect={(e) => setSelectedFile(e.files[0])}
                 className="w-full"

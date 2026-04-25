@@ -14,7 +14,11 @@ export class NewsService {
     private readonly uploadService: UploadService,
   ) {}
 
-  async create(createNewsDto: CreateNewsDto, file?: Express.Multer.File) {
+  async create(
+    id: number,
+    createNewsDto: CreateNewsDto,
+    file?: Express.Multer.File,
+  ) {
     let image: string | undefined = undefined;
 
     if (file) {
@@ -25,6 +29,7 @@ export class NewsService {
       ...createNewsDto,
       image,
       created_at: new Date(),
+      author: { id },
     });
 
     return this.newsRepository.save(newItem);

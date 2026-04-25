@@ -9,6 +9,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Request,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
@@ -23,10 +24,11 @@ export class NewsController {
   @Post()
   @UseInterceptors(FileInterceptor('image'))
   create(
+    @Request() req,
     @Body() dto: CreateNewsDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.newsService.create(dto, file);
+    return this.newsService.create(Number(req.user.sub), dto, file);
   }
 
   @Public()

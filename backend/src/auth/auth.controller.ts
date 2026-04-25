@@ -22,7 +22,7 @@ export class AuthController {
     return this.authService.signIn(signInDto.email, signInDto.password);
   }
 
-  @Get('profile')
+  @Get('me')
   getProfile(@Request() req) {
     return req.user;
   }
