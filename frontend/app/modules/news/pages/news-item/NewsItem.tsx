@@ -1,10 +1,16 @@
 import type { NewsItem } from "~/modules/news/types";
 import { Card } from "primereact/card";
 
-export default function NewsItem({ item, onClick }: { item: NewsItem; onClick: (item: NewsItem) => void }) {
+export default function NewsItem({
+  item,
+  onClick,
+}: {
+  item: NewsItem;
+  onClick: (item: NewsItem) => void;
+}) {
   const setNews = () => {
-    onClick(item)
-  }
+    onClick(item);
+  };
 
   return (
     <Card onClick={setNews} className="relative cursor-pointer">
@@ -14,17 +20,11 @@ export default function NewsItem({ item, onClick }: { item: NewsItem; onClick: (
         </div>
 
         <div className="flex-1 min-w-0 overflow-hidden flex flex-col gap-1">
-          <div className="text-2xl font-bold">
-            {item.title}
-          </div>
+          <div className="text-2xl font-bold">{item.title}</div>
 
-          <p>
-            {item.news_text}
-          </p>
+          <p>{item.news_text}</p>
 
-          <div>
-            {String(item.created_at)}
-          </div>
+          <div>{String(item.created_at)}</div>
         </div>
       </div>
     </Card>
