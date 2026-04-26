@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import {
   createNewsApi,
+  createReportApi,
   loadNewsApi,
   removeNewsApi,
   updateNewsApi,
@@ -42,4 +43,9 @@ export const useUpdateNews = () =>
 export const useCreateNews = () =>
   useMutation({
     mutationFn: (data: FormData) => createNewsApi(data),
+  });
+
+export const useDownloadNews = () =>
+  useMutation({
+    mutationFn: createReportApi,
   });

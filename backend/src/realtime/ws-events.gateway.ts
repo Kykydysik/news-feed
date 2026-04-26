@@ -76,7 +76,7 @@ export class WsEventsGateway implements OnGatewayInit {
   //   };
   // }
 
-  private emitToUser(userId: number, payload: unknown, eventName: string) {
+  emitToUser(userId: number, payload: unknown, eventName: string) {
     this.server.to(this.userRoom(userId)).emit(eventName, payload);
   }
 
