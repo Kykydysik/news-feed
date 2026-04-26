@@ -1,98 +1,165 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS backend for the News Feed application. It provides REST APIs, JWT authentication, file uploads, WebSocket events, and background job processing with BullMQ.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tech Stack
 
-## Description
+- NestJS
+- TypeORM
+- PostgreSQL
+- Socket.IO
+- BullMQ
+- Redis
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Responsibilities
 
-## Project setup
+- Authenticate users with JWT
+- Serve public and protected REST endpoints
+- Store news and users in PostgreSQL
+- Handle avatar and news image uploads
+- Generate CSV reports in the background
+- Emit WebSocket events to a single user or all connected clients
 
-```bash
-$ npm install
+## Module Overview
+
+### `AuthModule`
+
+- `POST /api/auth/login`
+- Validates email and password
+- Returns `access_token`
+- Global auth guard protects all routes except those marked as public
+
+### `UserModule`
+
+- `GET /api/users/me`
+- `PATCH /api/users/me`
+- Loads and updates the current user profile
+
+### `NewsModule`
+
+- `GET /api/news`
+- `POST /api/news`
+- `PATCH /api/news/:id`
+- `DELETE /api/news/:id`
+- `POST /api/news/download`
+
+This module also:
+
+- registers the BullMQ queue for report generation
+- contains the queue processor
+- uses the realtime gateway to emit socket events
+
+### `RealtimeModule`
+
+- Registers `WsEventsGateway`
+- Accepts only authenticated Socket.IO connections
+- Places each connected user into a room named `user:<id>`
+- Supports both broadcast and personal event delivery
+
+### `UploadModule`
+
+- Saves uploaded images and generated files
+- Exposes files through the static `/uploads` path
+
+## Request Flow
+
+### Authentication
+
+1. Client sends credentials to `POST /api/auth/login`
+2. Backend verifies the password
+3. Backend returns a signed JWT
+4. Client sends the JWT in HTTP headers and Socket.IO handshake
+
+### Create News
+
+1. Authenticated client submits `multipart/form-data`
+2. Backend stores the optional image
+3. News is saved in PostgreSQL
+4. Backend emits a WebSocket event such as `news-added`
+
+### Download Report
+
+1. Client calls `POST /api/news/download`
+2. Backend adds a BullMQ job to the `report-generation` queue
+3. `ReportRunsProcessor` handles the job
+4. Backend collects all news rows and converts them to CSV
+5. Generated file is stored through the upload service
+6. Progress can be sent back over WebSockets
+
+## Environment
+
+The backend reads configuration from the root `.env` file.
+
+Example:
+
+```env
+PORT=3000
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_USER=your_user
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=news_feed
+AUTH_SECRET=your_jwt_secret
 ```
 
-## Compile and run the project
+For Docker Compose, Redis is expected to be available under host `redis` on port `6379`.
+
+## Running the Backend
+
+### With Docker Compose
+
+From the repository root:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker compose up -d --build
+docker compose exec backend npm run migration:run
+docker compose exec backend npm run db:seed
 ```
 
-## Run tests
+### Locally
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd backend
+npm install
+npm run migration:run
+npm run db:seed
+npm run start:dev
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Available Scripts
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run build
+npm run start
+npm run start:dev
+npm run start:prod
+npm run migration:run
+npm run db:seed
+npm run test
+npm run test:e2e
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## WebSocket Notes
 
-## Resources
+- Namespace: `/ws/connection`
+- Auth method: JWT in `auth.token` during Socket.IO handshake
+- User room format: `user:<id>`
 
-Check out a few resources that may come in handy when working with NestJS:
+Typical backend helpers:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- send to one user: `server.to(userRoom).emit(...)`
+- send to all users: `server.emit(...)`
 
-## Support
+## Data Storage
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- PostgreSQL stores users and news entities
+- Redis stores BullMQ queue data
+- Uploaded assets and generated reports are stored in `backend/uploads`
 
-## Stay in touch
+## API Prefix
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+All REST endpoints are served under:
 
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```text
+/api
+```
