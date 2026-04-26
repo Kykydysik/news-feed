@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { News } from './entities/news.entity';
 import { UploadService } from '../upload/upload.service';
+import { WsEventsGateway } from '../realtime/ws-events.gateway';
 
 @Injectable()
 export class NewsService {
@@ -12,6 +13,7 @@ export class NewsService {
     @InjectRepository(News)
     private newsRepository: Repository<News>,
     private readonly uploadService: UploadService,
+    private readonly wsEventsGateway: WsEventsGateway,
   ) {}
 
   async create(
@@ -32,7 +34,11 @@ export class NewsService {
       author: { id },
     });
 
-    return this.newsRepository.save(newItem);
+    const news = await this.newsRepository.save(newItem);
+
+    this.wsEventsGateway.emitToAll(news, 'news-added');
+
+    return news;
   }
 
   async findAll({

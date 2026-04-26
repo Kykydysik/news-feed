@@ -6,6 +6,7 @@ import { News } from './entities/news.entity';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { UploadModule } from '../upload/upload.module';
+import { RealtimeModule } from '../realtime/realtime.module';
 
 MulterModule.register({
   storage: memoryStorage(),
@@ -13,7 +14,7 @@ MulterModule.register({
 });
 
 @Module({
-  imports: [TypeOrmModule.forFeature([News]), UploadModule],
+  imports: [TypeOrmModule.forFeature([News]), UploadModule, RealtimeModule],
   controllers: [NewsController],
   providers: [NewsService],
 })

@@ -1,10 +1,19 @@
-// переделать это на класс
-export const isUserAuth = () => {
-  const token = localStorage.getItem('token')
+export class UserToken {
+  public static readonly tokenName = "token";
 
-  return Boolean(token);
-}
+  public static getToken() {
+    return localStorage.getItem(this.tokenName);
+  }
 
-export const saveToken = (token: string) => {
-  localStorage.setItem('token', token)
+  public static saveToken(token: string) {
+    localStorage.setItem("token", token);
+  }
+
+  public static removeToken() {
+    localStorage.removeItem("token");
+  }
+
+  public static isUserAuth() {
+    return Boolean(UserToken.getToken());
+  }
 }

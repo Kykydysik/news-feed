@@ -3,15 +3,16 @@ import type {
   AxiosInstance,
   AxiosResponse,
   InternalAxiosRequestConfig,
-} from 'axios';
-import axios from 'axios';
+} from "axios";
+import axios from "axios";
+import { UserToken } from "~/modules/profile/lib/is-user-auth";
 
 class HttpClient {
   protected readonly instance: AxiosInstance;
 
   constructor() {
     this.instance = axios.create({
-      baseURL: 'http://localhost:3000/api',
+      baseURL: import.meta.env.VITE_BACKEND_HOST,
     });
 
     this._initializeResponseInterceptor();
@@ -50,10 +51,10 @@ class HttpClient {
   };
 
   private _handleRequest = async (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
 
     if (config.headers && token) {
-      config.headers['Authorization'] = `Bearer ${token}`
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
 
     return config;
@@ -64,6 +65,12 @@ class HttpClient {
   };
 
   protected _handleError = async (error: AxiosError) => {
+    const NOT_AUTH_ERROR = 401;
+
+    if (error.response?.status === NOT_AUTH_ERROR) {
+      UserToken.removeToken();
+    }
+
     return Promise.reject(error);
   };
 }

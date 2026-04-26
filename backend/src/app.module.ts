@@ -13,6 +13,7 @@ import { UploadModule } from './upload/upload.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AuthModule } from './auth/auth.module';
+import { RealtimeModule } from './realtime/realtime.module';
 
 MulterModule.register({
   storage: memoryStorage(),
@@ -37,6 +38,6 @@ MulterModule.register({
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RealtimeModule],
 })
 export class AppModule {}

@@ -1,17 +1,22 @@
-import { useMutation, useQuery, useInfiniteQuery } from '@tanstack/react-query';
-import {createNewsApi, loadNewsApi, removeNewsApi, updateNewsApi} from "~/modules/news/api";
-import type {CreateNewsItemParams, NewsItem} from "~/modules/news/types";
+import { useMutation, useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  createNewsApi,
+  loadNewsApi,
+  removeNewsApi,
+  updateNewsApi,
+} from "~/modules/news/api";
+import type { CreateNewsItemParams, NewsItem } from "~/modules/news/types";
 
 export enum NewsQueryKeys {
-  LoadNewsList = 'LoadNewsList',
+  LoadNewsList = "LoadNewsList",
 }
 
-export const useLoadNews = (sort: 'ASC' | 'DESC') => {
-  return useInfiniteQuery<{ items: NewsItem[], totalCount: 0 }>({
+export const useLoadNews = (sort: "ASC" | "DESC") => {
+  return useInfiniteQuery<{ items: NewsItem[]; totalCount: 0 }>({
     queryKey: [NewsQueryKeys.LoadNewsList, sort],
     queryFn: async ({ pageParam }) => {
-      console.log(sort)
-      return loadNewsApi(pageParam as number, sort)
+      console.log(sort);
+      return loadNewsApi(pageParam as number, sort);
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages, lastPageParam) => {
@@ -20,24 +25,21 @@ export const useLoadNews = (sort: 'ASC' | 'DESC') => {
 
       return totalLoaded <= totalCount ? totalLoaded : undefined;
     },
-  })
-}
+  });
+};
 
 export const useRemoveNews = () =>
-    useMutation({
-      mutationFn: (id: NewsItem['id']) =>
-          removeNewsApi(id),
-    });
+  useMutation({
+    mutationFn: (id: NewsItem["id"]) => removeNewsApi(id),
+  });
 
 export const useUpdateNews = () =>
-    useMutation({
-      mutationFn: (data: { id: NewsItem['id'], formData: FormData }) =>
-          updateNewsApi(data),
-    });
+  useMutation({
+    mutationFn: (data: { id: NewsItem["id"]; formData: FormData }) =>
+      updateNewsApi(data),
+  });
 
 export const useCreateNews = () =>
-    useMutation({
-      mutationFn: (data: FormData) =>
-          createNewsApi(data),
-    });
-
+  useMutation({
+    mutationFn: (data: FormData) => createNewsApi(data),
+  });
