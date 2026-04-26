@@ -1,13 +1,15 @@
 import {
+  NewsQueryKeys,
   useCreateNews,
   useRemoveNews,
   useUpdateNews,
 } from "~/modules/news/service";
 import * as yup from "yup";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import type { CreateNewsItemParams, NewsItem } from "~/modules/news/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const useNewsDialog = ({
   news,
@@ -25,6 +27,7 @@ export const useNewsDialog = ({
     title: yup.string().required(),
     news_text: yup.string().required(),
   });
+  const queryClient = useQueryClient();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -41,6 +44,13 @@ export const useNewsDialog = ({
     },
   });
 
+  useEffect(() => {
+    reset({
+      title: news?.title || "",
+      news_text: news?.news_text || "",
+    });
+  }, [news, reset]);
+
   const onSubmit: SubmitHandler<CreateNewsItemParams> = async (data) => {
     const formData = new FormData();
 
@@ -53,6 +63,9 @@ export const useNewsDialog = ({
 
     if (news) {
       await updateNews({ id: news.id, formData });
+      // тут тоже можно получать по сокетам, искать по id и обновлять, но потом переделаю
+      // или пусть найдется добрый человек, который сделает это за меня
+      await queryClient.invalidateQueries({ queryKey: [NewsQueryKeys.LoadNewsList] });
     } else {
       await createNews(formData);
     }

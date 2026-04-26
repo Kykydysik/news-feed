@@ -9,7 +9,7 @@ import { NewsModule } from './news/news.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { UploadModule } from './upload/upload.module';
-
+import { BullModule } from '@nestjs/bullmq';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AuthModule } from './auth/auth.module';
@@ -32,12 +32,19 @@ MulterModule.register({
       serveRoot: '/uploads',
       exclude: ['/api*'],
     }),
+    BullModule.forRoot({
+      connection: {
+        host: 'redis', // в enx вынести
+        port: 6379,
+      },
+    }),
     NewsModule,
     UserModule,
     UploadModule,
     AuthModule,
+    RealtimeModule,
   ],
   controllers: [AppController],
-  providers: [AppService, RealtimeModule],
+  providers: [AppService],
 })
 export class AppModule {}
