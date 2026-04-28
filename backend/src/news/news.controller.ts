@@ -31,13 +31,6 @@ export class NewsController {
     return this.newsService.create(Number(req.user.sub), dto, file);
   }
 
-  @Post('/download')
-  downloadNews(
-    @Request() req
-  ) {
-    return this.newsService.downloadNews(Number(req.user.sub));
-  }
-
   @Public()
   @Get()
   findAll(

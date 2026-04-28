@@ -4,7 +4,7 @@ import type { RootState } from "~/store/store";
 import type { Profile } from "~/modules/profile/types";
 import { Avatar } from "primereact/avatar";
 import { Button } from "primereact/button";
-import { newsServices } from "~/modules/news";
+import { reportServices, ReportType } from "~/modules/reports"
 import { socketService } from "~/shared/api/socket-server";
 import { useEffect, useRef } from "react";
 import { Toast } from 'primereact/toast'
@@ -13,7 +13,8 @@ export default function AuthUserWidget() {
   const profile = useSelector(
     (state: RootState) => state.profile.profile,
   ) as Profile;
-  const { mutateAsync } = newsServices.useDownloadNews()
+  const { mutateAsync } = reportServices.useCreateReport()
+
   const toast = useRef(null);
 
   //TODO вынести useEffect в отдельные компоненты что бы по красоте было
@@ -43,7 +44,7 @@ export default function AuthUserWidget() {
 
   return (
     <div className="flex items-center justify-end gap-4">
-      <Button label="Скачать новости" onClick={() => mutateAsync()} />
+      <Button label="Скачать новости" onClick={() => mutateAsync(ReportType.News)} />
 
       <Avatar
         image={

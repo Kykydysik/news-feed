@@ -6,10 +6,6 @@ import { Repository } from 'typeorm';
 import { News } from './entities/news.entity';
 import { UploadService } from '../upload/upload.service';
 import { WsEventsGateway } from '../realtime/ws-events.gateway';
-import { Queue } from 'bullmq';
-import { InjectQueue } from '@nestjs/bullmq';
-import { NEWS_GENERATION_JOB, NEWS_GENERATION_QUEUE } from './news.constants';
-import { json2csv } from 'json-2-csv';
 
 @Injectable()
 export class NewsService {
@@ -18,11 +14,6 @@ export class NewsService {
     private newsRepository: Repository<News>,
     private readonly uploadService: UploadService,
     private readonly wsEventsGateway: WsEventsGateway,
-    @InjectQueue(NEWS_GENERATION_QUEUE)
-    private readonly newsGenerationQueue: Queue<{
-      runId: string;
-      userId: number;
-    }>,
   ) {}
 
   async create(
@@ -96,31 +87,6 @@ export class NewsService {
 
   remove(id: number) {
     return this.newsRepository.delete(id);
-  }
-
-  async downloadNews(userId: number) {
-    // на досуге надо будет в отдельный сервис вынести со своей таблицей
-    await this.newsGenerationQueue.add(
-      NEWS_GENERATION_JOB,
-      {
-        runId: '1',
-        userId
-      },
-      {
-        removeOnComplete: 100,
-        removeOnFail: 100,
-      },
-    );
-
-    this.wsEventsGateway.emitToUser(
-      userId,
-      {
-        message: 'Началось формирование отчета',
-      },
-      'start-create-report',
-    );
-
-    return;
   }
 
   async getAllItemsForReport() {
