@@ -29,6 +29,7 @@ export class ReportRunsProcessor extends WorkerHost {
 
     try {
       const rows = await this.getRowsData(job.data.type);
+      // here you can expand the report type for any file (that is, transfer another parameter here - the file type and save it in the format we need)
       const fileUrl = await this.uploadService.saveGeneratedFile(
         json2csv(rows),
         'news-report.csv',
@@ -48,6 +49,7 @@ export class ReportRunsProcessor extends WorkerHost {
   }
 
   getRowsData(type: ReportTypes) {
+    // here we can expand the type of report and compile them based on any criteria.
     switch (type) {
       case ReportTypes.News:
         return this.newsService.getAllItemsForReport();
