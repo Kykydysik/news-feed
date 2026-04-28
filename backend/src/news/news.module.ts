@@ -7,9 +7,6 @@ import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { UploadModule } from '../upload/upload.module';
 import { RealtimeModule } from '../realtime/realtime.module';
-import { BullModule } from '@nestjs/bullmq';
-import { NEWS_GENERATION_QUEUE } from './news.constants';
-import { ReportRunsProcessor } from './news-report.processor';
 
 MulterModule.register({
   storage: memoryStorage(),
@@ -21,11 +18,9 @@ MulterModule.register({
     TypeOrmModule.forFeature([News]),
     UploadModule,
     RealtimeModule,
-    BullModule.registerQueue({
-      name: NEWS_GENERATION_QUEUE,
-    }),
   ],
   controllers: [NewsController],
-  providers: [NewsService, ReportRunsProcessor],
+  providers: [NewsService],
+  exports: [NewsService],
 })
 export class NewsModule {}

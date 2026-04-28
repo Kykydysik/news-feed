@@ -16,5 +16,3 @@ export const updateNewsApi = (data: {
 }) => httpClient.patch(`/news/${data.id}`, data.formData);
 
 export const createNewsApi = (data: FormData) => httpClient.post(`/news`, data);
-
-export const createReportApi = () => httpClient.post(`/news/download`);
